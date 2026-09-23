@@ -322,7 +322,7 @@ HTTP/1.1 429 Too Many Requests
 Retry-After: 30
 Content-Type: application/json
 
-{"warning": "Anonymous requests are limited to 100 per hour, authenticate to raise the limit"}
+{"warning": "Anonymous requests are limited to 100 per minute, authenticate to raise the limit"}
 ```
 
 Composer shows the warning whether it then retries or fails. When many
