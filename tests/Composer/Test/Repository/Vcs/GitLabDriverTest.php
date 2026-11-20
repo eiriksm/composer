@@ -448,14 +448,17 @@ JSON;
         self::assertEquals($expected, $driver->getBranches(), 'Branches are cached');
     }
 
-    public function testGetBranchesWithUnexpectedResponse(): void
+    /**
+     * @dataProvider provideUnexpectedReferencesResponses
+     */
+    public function testGetBranchesWithUnexpectedResponse(string $body): void
     {
         $driver = $this->testInitialize('https://gitlab.com/mygroup/myproject', 'https://gitlab.com/api/v4/projects/mygroup%2Fmyproject');
 
         $apiUrl = 'https://gitlab.com/api/v4/projects/mygroup%2Fmyproject/repository/branches?per_page=100';
 
         $this->httpDownloader->expects(
-            [['url' => $apiUrl, 'body' => '{"id": 123}']],
+            [['url' => $apiUrl, 'body' => $body]],
             true
         );
         $driver->setHttpDownloader($this->httpDownloader);
@@ -464,6 +467,17 @@ JSON;
         self::expectExceptionMessage('Unexpected response from GitLab API for '.$apiUrl.', expected a list of branches');
 
         $driver->getBranches();
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function provideUnexpectedReferencesResponses(): array
+    {
+        return [
+            'object instead of list' => ['{"id": 123}'],
+            'scalar instead of list' => ['123'],
+        ];
     }
 
     /**
