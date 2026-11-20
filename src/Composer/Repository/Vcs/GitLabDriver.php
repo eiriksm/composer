@@ -359,8 +359,17 @@ class GitLabDriver extends VcsDriver
         do {
             $response = $this->getContents($resource);
             $data = $response->decodeJson();
+            $unexpectedResponseMessage = 'Unexpected response from GitLab API for '.Url::sanitize($resource).', expected a list of '.$type;
+
+            if (!is_array($data)) {
+                throw new \UnexpectedValueException($unexpectedResponseMessage);
+            }
 
             foreach ($data as $datum) {
+                if (!is_array($datum) || !isset($datum['name'], $datum['commit']['id'])) {
+                    throw new \UnexpectedValueException($unexpectedResponseMessage);
+                }
+
                 $references[$datum['name']] = $datum['commit']['id'];
 
                 // Keep the last commit date of a reference to avoid
